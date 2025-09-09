@@ -1,1 +1,2 @@
-{ "name": "vercel-ping", "private": true, "type": "module", "engines": { "node": ">=18" } }
+{ "name": "igdb-proxy", "private": true, "type": "module", "engines": { "node": ">=18" } }
+
