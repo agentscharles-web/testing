@@ -1,64 +1,6 @@
-// /api/releases  — Vercel Node.js Serverless Function
-// Queries IGDB /v4/release_dates via Twitch OAuth and returns normalized JSON.
-// Query params: from=YYYY-MM-DD, to=YYYY-MM-DD, days=120, region=8,
-//               platforms=167,169, search=zelda, limit=200
-// CORS: ALLOWED_ORIGIN or ALLOWED_ORIGINS (comma-separated) envs.
-
-let tokenCache = { token: null, exp: 0 }; // per-lambda instance cache
-
-export default async function handler(req, res) {
-  try {
-    // ---- CORS ----
-    const origin = req.headers.origin || "";
-    const allowed = pickAllowedOrigin(origin, process.env.ALLOWED_ORIGIN, process.env.ALLOWED_ORIGINS);
-    if (allowed) {
-      res.setHeader("Access-Control-Allow-Origin", allowed);
-      res.setHeader("Vary", "Origin");
-    } else {
-      // default open if no env provided
-      res.setHeader("Access-Control-Allow-Origin", "*");
-    }
-    res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    if (req.method === "OPTIONS") return res.status(204).end();
-    if (req.method !== "GET") return res.status(405).send("Method Not Allowed");
-
-    // ---- Env ----
-    const { TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET } = process.env;
-    if (!TWITCH_CLIENT_ID || !TWITCH_CLIENT_SECRET) {
-      return res.status(500).send("Missing Twitch credentials");
-    }
-
-    // ---- Parse query ----
-    const url = new URL(req.url, "https://dummy.host");
-    const q = Object.fromEntries(url.searchParams.entries());
-
-    const now = new Date();
-    const days = clampInt(q.days ? parseInt(q.days, 10) : 90, 1, 365);
-    const fromIso = isIsoDate(q.from) ? q.from : now.toISOString().slice(0, 10);
-    const toIso = isIsoDate(q.to) ? q.to : new Date(now.getTime() + days * 86400_000).toISOString().slice(0, 10);
-
-    const region = q.region ? String(parseInt(q.region, 10)) : ""; // IGDB region enum
-    const platforms = q.platforms
-      ? q.platforms.split(",").map(s => s.trim()).filter(Boolean)
-      : null;
-    const search = (q.search || "").trim();
-    const limit = clampInt(q.limit ? parseInt(q.limit, 10) : 500, 1, 500);
-
-    const fromTs = Math.floor(new Date(fromIso).getTime() / 1000);
-    const toTs = Math.floor(new Date(toIso).getTime() / 1000);
-
-    // ---- Build IGDB query body ----
-    const whereParts = [
-      `date >= ${fromTs}`,
-      `date <= ${toTs}`,
-      `game != null`
-    ];
-    if (region) whereParts.push(`region = ${Number(region)}`);
-    if (platforms?.length) whereParts.push(`platform = (${platforms.join(",")})`);
-
-    let where = `where ${whereParts.join(" & ")};`;
-    if (search) {
+export default function handler(req, res) {
+  res.status(200).json({ ok: true, route: "/api/releases", now: Date.now() });
+}
       const safe = search.replace(/"/g, '\\"');
       where = `where ${whereParts.join(" & ")} & game.name ~ *"${safe}"*;`;
     }
