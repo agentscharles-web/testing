@@ -6,3 +6,4 @@ remotePatterns: [
 ]
 }
 }
+module.exports = nextConfig;
