@@ -1,4 +1,3 @@
-```ts
 body,
 next: { revalidate: 3600 },
 })
@@ -40,7 +39,3 @@ res.status(200).json({ releases, generatedAt: new Date().toISOString() })
 res.status(500).json({ error: err.message || 'Unknown error' })
 }
 }
-```
-
-
----
