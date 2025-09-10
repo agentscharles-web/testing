@@ -1,0 +1,10 @@
+```json
+{
+"crons": [
+{ "path": "/api/igdb-releases?warm=1", "schedule": "0 7 * * *" }
+]
+}
+```
+
+
+---
