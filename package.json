@@ -1,4 +1,3 @@
-```json
 {
 "name": "upcoming-games-igdb",
 "version": "1.0.0",
@@ -24,7 +23,3 @@
 "typescript": "5.4.5"
 }
 }
-```
-
-
----
